@@ -15,9 +15,6 @@ env/
 .DS_Store
 Thumbs.db
 
-# Data files (optional - if large)
-data/*.csv
-
 # Tableau temp files
 *.twb~
 *.temp
