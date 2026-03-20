@@ -331,12 +331,13 @@ def api_search():
 
 # ── ENTRY ─────────────────────────────────────────────────────────────────────
 if __name__ == '__main__':
-    print(f"\n{'─' * 52}")
-    print(f"  HousingIQ  |  Market Intelligence Dashboard")
-    print(f"{'─' * 52}")
-    print(f"  Dataset : {DATA_PATH}")
-    print(f"  Records : {STATS['total_records']:,}")
-    print(f"  Avg $   : ${STATS['avg_price']:,.0f}")
-    print(f"  URL     : http://127.0.0.1:5000")
-    print(f"{'─' * 52}\n")
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    # print(f"\n{'─' * 52}")
+    # print(f"  HousingIQ  |  Market Intelligence Dashboard")
+    # print(f"{'─' * 52}")
+    # print(f"  Dataset : {DATA_PATH}")
+    # print(f"  Records : {STATS['total_records']:,}")
+    # print(f"  Avg $   : ${STATS['avg_price']:,.0f}")
+    # print(f"  URL     : http://127.0.0.1:5000")
+    # print(f"{'─' * 52}\n")
+    # app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=True)
