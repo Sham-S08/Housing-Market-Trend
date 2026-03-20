@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>HousingIQ — Market Intelligence</title>
+  <!-- Style sheet served from templates/ via Flask /templates/ route -->
+  <link rel="stylesheet" href="/templates/style.css"/>
+</head>
+<body>
+
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+
+<div class="app">
+
+  <!-- ═══ HEADER ═══════════════════════════════════════════════════ -->
+  <header class="site-header">
+    <div class="logo">
+      <span class="logo-wordmark">HousingIQ</span>
+      <span class="logo-tagline">Market Intelligence</span>
+    </div>
+    <div class="header-meta">
+      <div class="meta-stat">
+        <div class="val" id="hdr-records">21,609</div>
+        <div class="lbl">Properties</div>
+      </div>
+      <div class="meta-stat">
+        <div class="val" id="hdr-avg">$540K</div>
+        <div class="lbl">Market Avg</div>
+      </div>
+      <div class="meta-stat">
+        <div class="val">31</div>
+        <div class="lbl">Signals</div>
+      </div>
+      <div class="live-indicator" title="Live data"></div>
+    </div>
+  </header>
+
+  <!-- ═══ SEARCH ════════════════════════════════════════════════════ -->
+  <section class="search-section">
+    <div class="search-box">
+      <!-- Lucide Search icon -->
+      <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+           viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+      </svg>
+      <input type="text" id="searchInput"
+             placeholder="Ask anything — 'Is renovation worth it?' or 'Best under $700K in zip group 5'"/>
+      <button class="btn-search" onclick="runSearch()">Analyze</button>
+    </div>
+    <div class="chips">
+      <button class="chip" onclick="quickSearch('Price for 4 bed, 3 bath, 2500 sqft in zip group 5')">4-bed Zip-5 valuation</button>
+      <button class="chip" onclick="quickSearch('Is renovation worth it?')">Worth renovating?</button>
+      <button class="chip" onclick="quickSearch('Best house under 700000')">Best under $700K</button>
+      <button class="chip" onclick="quickSearch('Waterfront premium comparison')">Waterfront premium</button>
+      <button class="chip" onclick="quickSearch('Which zipcode group gives best ROI?')">Best ROI by area</button>
+      <button class="chip" onclick="quickSearch('How much does grade affect price?')">Grade impact</button>
+    </div>
+  </section>
+
+  <!-- ═══ AI RESPONSE ═══════════════════════════════════════════════ -->
+  <div class="ai-panel" id="aiPanel">
+    <div class="ai-label">AI Analysis</div>
+    <div class="ai-text" id="aiText"></div>
+  </div>
+
+  <!-- ═══ KPI CARDS ═════════════════════════════════════════════════ -->
+  <div class="kpi-grid">
+
+    <div class="kpi-card blue">
+      <div class="kpi-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+             viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="1" x2="12" y2="23"/>
+          <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+        </svg>
+      </div>
+      <div class="kpi-value" id="kpi-avg">$540K</div>
+      <div class="kpi-label">Average Sale Price</div>
+      <div class="kpi-delta pos">Sqft is top driver (+0.695 corr)</div>
+    </div>
+
+    <div class="kpi-card teal">
+      <div class="kpi-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+             viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+        </svg>
+      </div>
+      <div class="kpi-value" id="kpi-reno">+$151K</div>
+      <div class="kpi-label">Renovation Premium</div>
+      <div class="kpi-delta pos" id="kpi-reno-delta">$656K vs $505K avg</div>
+    </div>
+
+    <div class="kpi-card gold">
+      <div class="kpi-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+             viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+          <polyline points="9 22 9 12 15 12 15 22"/>
+        </svg>
+      </div>
+      <div class="kpi-value" id="kpi-wf">+$451K</div>
+      <div class="kpi-label">Waterfront Premium</div>
+      <div class="kpi-delta pos" id="kpi-wf-delta">$958K vs $507K avg</div>
+    </div>
+
+    <div class="kpi-card red">
+      <div class="kpi-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+             viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+        </svg>
+      </div>
+      <div class="kpi-value" id="kpi-grade">+$199K</div>
+      <div class="kpi-label">Grade 8 → 9 Jump</div>
+      <div class="kpi-delta pos">Strongest single upgrade lever</div>
+    </div>
+
+  </div><!-- /kpi-grid -->
+
+  <!-- ═══ MAIN GRID: VALUATION + SIMULATOR ══════════════════════════ -->
+  <div class="main-grid">
+
+    <!-- ─── VALUATION PANEL ──────────────────────────────────────── -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">
+          <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14"
+               viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+            <line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+          </svg>
+          Property Valuation
+        </div>
+        <span class="panel-badge">AI-Powered Estimate</span>
+      </div>
+      <div class="panel-body">
+        <div class="val-grid">
+
+          <!-- Inputs -->
+          <div>
+            <div class="form-group">
+              <label class="form-label">Bedrooms</label>
+              <input type="range" min="1" max="9" value="4" id="bedrooms"
+                     oninput="updateSlider('bedrooms','bedroomsVal'); calcPrice()"/>
+              <div class="slider-val" id="bedroomsVal">4</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Bathrooms</label>
+              <input type="range" min="1" max="8" step="0.25" value="2.5" id="bathrooms"
+                     oninput="updateSliderF('bathrooms','bathroomsVal'); calcPrice()"/>
+              <div class="slider-val" id="bathroomsVal">2.50</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Flat Area (sqft)</label>
+              <input type="number" id="sqft" value="2500" min="500" max="12000" step="100"
+                     oninput="calcPrice()"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Overall Grade</label>
+              <select id="grade" onchange="calcPrice()">
+                <option value="5">Grade 5 — Low</option>
+                <option value="6">Grade 6 — Below Average</option>
+                <option value="7" selected>Grade 7 — Average</option>
+                <option value="8">Grade 8 — Good</option>
+                <option value="9">Grade 9 — Very Good</option>
+                <option value="10">Grade 10 — Excellent</option>
+                <option value="11">Grade 11 — Luxury</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Zipcode Group</label>
+              <select id="zipGroup" onchange="calcPrice()">
+                <option value="1">Group 1 — $361K avg</option>
+                <option value="2">Group 2 — $441K avg</option>
+                <option value="3">Group 3 — $550K avg</option>
+                <option value="4">Group 4 — $623K avg</option>
+                <option value="5" selected>Group 5 — $718K avg</option>
+                <option value="6">Group 6 — $771K avg</option>
+                <option value="7">Group 7 — $881K avg</option>
+                <option value="8">Group 8 — $975K avg</option>
+                <option value="9">Group 9 — $1.102M avg</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Waterfront View</label>
+              <div class="toggle-row">
+                <button class="toggle-btn active" id="wfNo"  onclick="setToggle('wf','No')">No View</button>
+                <button class="toggle-btn"         id="wfYes" onclick="setToggle('wf','Yes')">Waterfront</button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Ever Renovated</label>
+              <div class="toggle-row">
+                <button class="toggle-btn active" id="renNo"  onclick="setToggle('ren','No')">Original</button>
+                <button class="toggle-btn"         id="renYes" onclick="setToggle('ren','Yes')">Renovated</button>
+              </div>
+            </div>
+            <button class="btn-primary" onclick="calcPrice()">Calculate Estimate</button>
+          </div>
+
+          <!-- Output -->
+          <div class="val-output">
+            <div class="val-output-label">Estimated Price</div>
+            <div class="estimated-price" id="estimatedPrice">$718K</div>
+            <div class="price-range" id="priceRange">Confidence Range: $675K – $761K</div>
+            <hr class="divider"/>
+            <div class="drivers-title">Key Value Drivers</div>
+
+            <div class="driver-row">
+              <span class="driver-label">Sqft</span>
+              <div class="driver-track"><div class="driver-bar" id="bar-sqft" style="width:60%"></div></div>
+              <span class="driver-amount" id="amt-sqft">+$63K</span>
+            </div>
+            <div class="driver-row">
+              <span class="driver-label">Grade</span>
+              <div class="driver-track"><div class="driver-bar" id="bar-grade" style="width:0%"></div></div>
+              <span class="driver-amount" id="amt-grade">+$0</span>
+            </div>
+            <div class="driver-row">
+              <span class="driver-label">Location</span>
+              <div class="driver-track"><div class="driver-bar" id="bar-zip" style="width:70%"></div></div>
+              <span class="driver-amount" id="amt-zip">+$357K</span>
+            </div>
+            <div class="driver-row">
+              <span class="driver-label">Waterfront</span>
+              <div class="driver-track"><div class="driver-bar" id="bar-wf" style="width:0%"></div></div>
+              <span class="driver-amount" id="amt-wf">$0</span>
+            </div>
+            <div class="driver-row">
+              <span class="driver-label">Renovation</span>
+              <div class="driver-track"><div class="driver-bar" id="bar-ren" style="width:0%"></div></div>
+              <span class="driver-amount" id="amt-ren">$0</span>
+            </div>
+
+            <hr class="divider"/>
+            <div class="val-tags" id="valTags">
+              <span class="tag grade">Grade 7</span>
+              <span class="tag location">Zip Group 5</span>
+            </div>
+          </div>
+
+        </div><!-- /val-grid -->
+      </div><!-- /panel-body -->
+    </div><!-- /panel -->
+
+    <!-- ─── WHAT-IF SIMULATOR ────────────────────────────────────── -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">
+          <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14"
+               viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="23 4 23 10 17 10"/>
+            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+          </svg>
+          What-If Simulator
+        </div>
+        <span class="panel-badge">Toggle Upgrades</span>
+      </div>
+      <div class="panel-body">
+        <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px;">
+          Toggle upgrades on a base
+          <strong style="color:var(--text)">Grade 7 · 3-bed · Zip-5</strong> home.
+          See combined price impact instantly.
+        </p>
+
+        <div class="sim-grid">
+
+          <div class="upgrade-card" id="up-bathroom" data-key="bathroom" onclick="toggleUpgrade('bathroom')">
+            <div class="upgrade-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                   viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 12h16a1 1 0 0 1 1 1v3a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4v-3a1 1 0 0 1 1-1z"/>
+                <path d="M6 12V5a2 2 0 0 1 2-2h3v2.25"/>
+                <line x1="4" y1="21" x2="4" y2="22"/><line x1="20" y1="21" x2="20" y2="22"/>
+              </svg>
+            </div>
+            <div class="upgrade-name">Add Bathroom</div>
+            <div class="upgrade-amount">+$135K</div>
+            <div class="upgrade-desc">Avg impact per added bath</div>
+          </div>
+
+          <div class="upgrade-card" id="up-grade" data-key="grade" onclick="toggleUpgrade('grade')">
+            <div class="upgrade-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                   viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+              </svg>
+            </div>
+            <div class="upgrade-name">Grade 7 to 9</div>
+            <div class="upgrade-amount">+$281K</div>
+            <div class="upgrade-desc">Two-step grade improvement</div>
+          </div>
+
+          <div class="upgrade-card" id="up-reno" data-key="reno" onclick="toggleUpgrade('reno')">
+            <div class="upgrade-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                   viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+              </svg>
+            </div>
+            <div class="upgrade-name">Full Renovation</div>
+            <div class="upgrade-amount">+$151K</div>
+            <div class="upgrade-desc">Avg renovation premium</div>
+          </div>
+
+          <div class="upgrade-card" id="up-sqft" data-key="sqft" onclick="toggleUpgrade('sqft')">
+            <div class="upgrade-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                   viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 21H3V3"/><path d="M21 12H12v9"/>
+              </svg>
+            </div>
+            <div class="upgrade-name">Add 500 sqft</div>
+            <div class="upgrade-amount">+$62K</div>
+            <div class="upgrade-desc">Based on sqft correlation</div>
+          </div>
+
+          <div class="upgrade-card" id="up-waterfront" data-key="waterfront" onclick="toggleUpgrade('waterfront')">
+            <div class="upgrade-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                   viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M2 12h20M2 18c1.5-1 3-1 4.5 0s3 1 4.5 0 3-1 4.5 0 3 1 4.5 0"/>
+                <path d="M2 6h20"/>
+              </svg>
+            </div>
+            <div class="upgrade-name">Waterfront Access</div>
+            <div class="upgrade-amount">+$451K</div>
+            <div class="upgrade-desc">Avg waterfront premium</div>
+          </div>
+
+          <div class="upgrade-card" id="up-zip" data-key="zip" onclick="toggleUpgrade('zip')">
+            <div class="upgrade-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                   viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                <circle cx="12" cy="10" r="3"/>
+              </svg>
+            </div>
+            <div class="upgrade-name">Move to Zip-9</div>
+            <div class="upgrade-amount">+$384K</div>
+            <div class="upgrade-desc">Zip-5 to Zip-9 premium</div>
+          </div>
+
+        </div><!-- /sim-grid -->
+
+        <div class="sim-total">
+          <div class="sim-total-label">Total Value Increase</div>
+          <div class="sim-total-value" id="simTotal">+$0</div>
+          <div class="sim-total-note" id="simBreakdown">Select upgrades above to calculate your potential upside</div>
+          <div class="sim-new-value" id="simNewValue">New Est. Value: $718K</div>
+        </div>
+
+      </div><!-- /panel-body -->
+    </div><!-- /panel -->
+
+  </div><!-- /main-grid -->
+
+  <!-- ═══ BOTTOM GRID: RECOMMENDER + COMPARISON ══════════════════════ -->
+  <div class="bottom-grid">
+
+    <!-- ─── RECOMMENDER ─────────────────────────────────────────── -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">
+          <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14"
+               viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+            <polyline points="9 22 9 12 15 12 15 22"/>
+          </svg>
+          What Should I Buy?
+        </div>
+        <span class="panel-badge">Smart Match</span>
+      </div>
+      <div class="panel-body">
+
+        <div class="form-group">
+          <label class="form-label">Max Budget</label>
+          <input type="range" min="200000" max="1200000" step="50000" value="700000"
+                 id="budget" oninput="updateBudgetDisplay()"/>
+          <div class="budget-display" id="budgetDisplay">$700K</div>
+          <div class="budget-sub">Slide to set your maximum budget</div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="form-group">
+            <label class="form-label">Min Bedrooms</label>
+            <select id="recBeds">
+              <option value="2">2 +</option>
+              <option value="3" selected>3 +</option>
+              <option value="4">4 +</option>
+              <option value="5">5 +</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Condition</label>
+            <select id="recCondition">
+              <option value="any">Any</option>
+              <option value="Good">Good</option>
+              <option value="Excellent" selected>Excellent</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Renovation Willingness</label>
+          <div class="toggle-row">
+            <button class="toggle-btn active" id="recRenNo"  onclick="setRecToggle('No')">Not Willing</button>
+            <button class="toggle-btn"         id="recRenYes" onclick="setRecToggle('Yes')">Happy to Renovate</button>
+          </div>
+        </div>
+
+        <button class="btn-gold" onclick="findRecommendation()">Find My Perfect Match</button>
+
+        <div class="rec-result" id="recResult">
+          <div class="rec-badge">Best Match Found</div>
+          <div class="rec-title" id="recTitle">—</div>
+          <div class="rec-price" id="recPrice">—</div>
+          <div class="rec-insight" id="recInsight">—</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ─── COMPARISON ──────────────────────────────────────────── -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">
+          <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14"
+               viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="20" x2="18" y2="10"/>
+            <line x1="12" y1="20" x2="12" y2="4"/>
+            <line x1="6"  y1="20" x2="6"  y2="14"/>
+          </svg>
+          Compare Two Houses
+        </div>
+        <span class="panel-badge">Side by Side</span>
+      </div>
+      <div class="panel-body">
+
+        <div class="compare-selects">
+          <div>
+            <div class="form-label">House A — Bedrooms</div>
+            <select id="cmpABeds" onchange="runCompare()">
+              <option value="3" selected>3</option>
+              <option value="4">4</option><option value="5">5</option>
+            </select>
+          </div>
+          <div class="compare-vs">vs</div>
+          <div>
+            <div class="form-label">House B — Bedrooms</div>
+            <select id="cmpBBeds" onchange="runCompare()">
+              <option value="3">3</option>
+              <option value="4">4</option><option value="5" selected>5</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="compare-selects" style="margin-top:10px">
+          <div>
+            <div class="form-label">Grade</div>
+            <select id="cmpAGrade" onchange="runCompare()">
+              <option value="7">Grade 7</option>
+              <option value="8" selected>Grade 8</option>
+              <option value="9">Grade 9</option>
+            </select>
+          </div>
+          <div></div>
+          <div>
+            <div class="form-label">Grade</div>
+            <select id="cmpBGrade" onchange="runCompare()">
+              <option value="7">Grade 7</option>
+              <option value="8" selected>Grade 8</option>
+              <option value="9">Grade 9</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="compare-selects" style="margin-top:10px">
+          <div>
+            <div class="form-label">Waterfront</div>
+            <select id="cmpAWF" onchange="runCompare()">
+              <option value="yes" selected>Waterfront</option>
+              <option value="no">No View</option>
+            </select>
+          </div>
+          <div></div>
+          <div>
+            <div class="form-label">Waterfront</div>
+            <select id="cmpBWF" onchange="runCompare()">
+              <option value="yes">Waterfront</option>
+              <option value="no" selected>No View</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="compare-selects" style="margin-top:10px">
+          <div>
+            <div class="form-label">Zip Group</div>
+            <select id="cmpAZip" onchange="runCompare()">
+              <option value="4" selected>Group 4</option>
+              <option value="5">Group 5</option>
+              <option value="6">Group 6</option>
+              <option value="7">Group 7</option>
+            </select>
+          </div>
+          <div></div>
+          <div>
+            <div class="form-label">Zip Group</div>
+            <select id="cmpBZip" onchange="runCompare()">
+              <option value="4">Group 4</option>
+              <option value="5">Group 5</option>
+              <option value="6">Group 6</option>
+              <option value="7" selected>Group 7</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="compare-output" style="margin-top:16px">
+          <div class="compare-card winner" id="cmpCardA">
+            <div class="compare-card-lbl">House A</div>
+            <div class="compare-price" id="cmpPriceA">—</div>
+            <div class="compare-row"><span>Bedrooms</span><span id="cmpABedsD">3 bed</span></div>
+            <div class="compare-row"><span>Waterfront</span><span id="cmpAWFD">Waterfront</span></div>
+            <div class="compare-row"><span>Location</span><span id="cmpAZipD">Zip Group 4</span></div>
+          </div>
+          <div class="compare-vs-center">vs</div>
+          <div class="compare-card" id="cmpCardB">
+            <div class="compare-card-lbl">House B</div>
+            <div class="compare-price" id="cmpPriceB">—</div>
+            <div class="compare-row"><span>Bedrooms</span><span id="cmpBBedsD">5 bed</span></div>
+            <div class="compare-row"><span>Waterfront</span><span id="cmpBWFD">No View</span></div>
+            <div class="compare-row"><span>Location</span><span id="cmpBZipD">Zip Group 7</span></div>
+          </div>
+        </div>
+        <div class="compare-insight" id="compareInsight">Configure both houses above to compare.</div>
+
+      </div>
+    </div>
+
+  </div><!-- /bottom-grid -->
+
+  <!-- ═══ LOCATION + INSIGHTS GRID ══════════════════════════════════ -->
+  <div class="main-grid">
+
+    <!-- ─── LOCATION INSIGHTS ────────────────────────────────────── -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">
+          <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14"
+               viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+            <circle cx="12" cy="10" r="3"/>
+          </svg>
+          Location Insights
+        </div>
+        <span class="panel-badge">Zipcode Analysis</span>
+      </div>
+      <div class="panel-body">
+        <div class="form-label" style="margin-bottom:10px">Average Price by Zipcode Group</div>
+        <div class="zip-chart" id="zipChart"></div>
+        <div class="location-legend">
+          <div class="legend-zone budget">
+            <div class="legend-zone-title">Budget Zones</div>
+            <div class="legend-zone-desc">Groups 1–2<br>$361K – $441K<br>Entry-level investment</div>
+          </div>
+          <div class="legend-zone value">
+            <div class="legend-zone-title">Value Zones</div>
+            <div class="legend-zone-desc">Groups 3–5<br>$550K – $718K<br>Best bang for buck</div>
+          </div>
+          <div class="legend-zone premium">
+            <div class="legend-zone-title">Premium Zones</div>
+            <div class="legend-zone-desc">Groups 7–9<br>$881K – $1.1M<br>High prestige</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── DATA INSIGHTS ─────────────────────────────────────────── -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">
+          <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14"
+               viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="20" x2="18" y2="10"/>
+            <line x1="12" y1="20" x2="12" y2="4"/>
+            <line x1="6"  y1="20" x2="6"  y2="14"/>
+          </svg>
+          Data Insights
+        </div>
+        <span class="panel-badge">21,609 Homes</span>
+      </div>
+      <div class="panel-body">
+        <div class="form-label" style="margin-bottom:10px">Grade to Price Ladder</div>
+        <div id="gradeLadder"></div>
+        <hr class="divider"/>
+        <div class="form-label" style="margin-bottom:10px">Top Correlations with Sale Price</div>
+        <div id="corrGrid"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ═══ SMART ALERTS ═══════════════════════════════════════════════ -->
+  <div class="panel full-panel">
+    <div class="panel-header">
+      <div class="panel-title">
+        <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14"
+             viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+          <line x1="12" y1="9" x2="12" y2="13"/>
+          <line x1="12" y1="17" x2="12.01" y2="17"/>
+        </svg>
+        Smart Insights &amp; Alerts
+      </div>
+      <span class="panel-badge">Auto-Generated</span>
+    </div>
+    <div class="panel-body">
+
+      <div class="alert-item warn">
+        <div class="alert-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+               viewBox="0 0 24 24" fill="none" stroke="#ff6b6b"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+            <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+        </div>
+        <div>
+          <div class="alert-title">Data Outlier Detected</div>
+          <div class="alert-desc">A 33-bedroom listing exists at $640K — unusually low for size. Likely a data entry error. Treat with caution in any analysis.</div>
+        </div>
+      </div>
+
+      <div class="alert-item info">
+        <div class="alert-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+               viewBox="0 0 24 24" fill="none" stroke="var(--accent)"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+        </div>
+        <div>
+          <div class="alert-title">Age Negatively Impacts Price</div>
+          <div class="alert-desc">Older homes carry a -0.064 correlation with sale price. Exception: renovated older homes recover full value — "Buy old, renovate smart" is the proven strategy.</div>
+        </div>
+      </div>
+
+      <div class="alert-item success">
+        <div class="alert-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+               viewBox="0 0 24 24" fill="none" stroke="var(--teal)"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/>
+            <polyline points="16 7 22 7 22 13"/>
+          </svg>
+        </div>
+        <div>
+          <div class="alert-title">Viewings Predict Premium Pricing</div>
+          <div class="alert-desc">Number of viewings has a +0.356 correlation — homes that attract repeat buyers sell 35–40% higher on average. Staged, well-marketed properties command significantly more.</div>
+        </div>
+      </div>
+
+      <div class="alert-item success">
+        <div class="alert-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+               viewBox="0 0 24 24" fill="none" stroke="var(--teal)"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+          </svg>
+        </div>
+        <div>
+          <div class="alert-title">Renovation ROI Strategy</div>
+          <div class="alert-desc">Renovated living area correlates stronger (+0.630) than original sqft — added space beats existing space. Best strategy: acquire undervalued older home, renovate living area, maximise ROI.</div>
+        </div>
+      </div>
+
+      <div class="alert-item warn">
+        <div class="alert-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+               viewBox="0 0 24 24" fill="none" stroke="#ff6b6b"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+            <line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+          </svg>
+        </div>
+        <div>
+          <div class="alert-title">Price Ceiling at $1,129,575</div>
+          <div class="alert-desc">Many listings cap at exactly $1,129,575 — likely a data transformation artifact or high-end bucket grouping. Estimates near this ceiling should be treated as lower bounds.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══ FOOTER ═════════════════════════════════════════════════════ -->
+  <footer class="site-footer">
+    <div class="footer-note">HousingIQ · Pearson correlation analysis · 21,609 rows × 31 columns · 0 missing values</div>
+    <div class="footer-dataset">Transformed_Housing_Data2.csv</div>
+  </footer>
+
+</div><!-- /app -->
+
+<!-- script.js served from templates/ via Flask /templates/ route -->
+<script src="/templates/script.js"></script>
+</body>
+</html>
