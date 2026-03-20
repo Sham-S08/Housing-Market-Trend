@@ -339,5 +339,4 @@ if __name__ == '__main__':
     # print(f"  Avg $   : ${STATS['avg_price']:,.0f}")
     # print(f"  URL     : http://127.0.0.1:5000")
     # print(f"{'─' * 52}\n")
-    # app.run(debug=True, host='0.0.0.0', port=5000)
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0', port=5000)
